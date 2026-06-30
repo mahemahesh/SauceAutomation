@@ -4,6 +4,7 @@ import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import org.testng.asserts.SoftAssert;
 
 import pages.LoginPage;
 import pages.InventoryPage;
@@ -57,6 +58,26 @@ public class CheckoutTest {
         String completeMsg = checkoutPage.getCompleteMessage();
         System.out.println("Step 8: Complete message -> '" + completeMsg + "'");
         Assert.assertEquals(completeMsg, "Thank you for your order!");
+    }
+    
+
+    @Test
+    public void testCheckoutPageFieldsSoft() {
+        loginPage.login("standard_user", "secret_sauce");
+        inventoryPage.addItemToCartByName("Sauce Labs Backpack");
+        inventoryPage.goToCart();
+        cartPage.clickCheckout();
+
+        SoftAssert softAssert = new SoftAssert();
+
+        softAssert.assertTrue(driver.getCurrentUrl().contains("checkout-step-one"), 
+            "Not on checkout step one page");
+        softAssert.assertTrue(driver.getTitle().equals("Swag Labs"), 
+            "Page title mismatch");
+        softAssert.assertEquals(inventoryPage.getCartItemCount(), "1", 
+            "Cart count mismatch");
+
+        softAssert.assertAll(); // This triggers all collected failures at once
     }
     @AfterMethod
     public void tearDown() {
